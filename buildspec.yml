@@ -7,7 +7,7 @@ phases:
       - echo Logging into Amazon ECR ...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPOSITORY_URI=
+      - REPOSITORY_URI=public.ecr.aws/h4h0t5v0/raj-registry
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_VERSION | cut -c 1-7)
       - IMAGE _TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}' )
       
