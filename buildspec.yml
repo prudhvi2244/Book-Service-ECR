@@ -1,16 +1,38 @@
 version: 0.2
 
 phases:
+  pre-build:
+    commands:
+      - mvn clean install
+      - echo Logging into Amazon ECR ...
+      - aws --version
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - REPOSITORY_URI=
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_VERSION | cut -c 1-7)
+      - IMAGE _TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}' )
+      
+      
   build:
     commands:
-      - echo Entered Into Build Phase
-      - mvn clean install
-      
+      - echo Build started on `date`
+      - echo Building the docker image ...
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+            
   post_build:
     commands:
-      - echo Build Completed Successfully
+      - echo Build Completed Successfully on `date`
+      - echo Pushing the Docker Images ...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo  Writing Image Definitions File ...
+      - printf  '[{"name":"Book-Service-ECR","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG  > imagedefinitions.json
+      - cat imagedefinitions.json
+      
       
 artifacts:
   files:
+    - imagedefinitions.json
     - target/Book-Service-ECR.jar
   discard-paths: yes
+
