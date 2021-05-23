@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - echo Entered Into Build Phase
+      - mvn clean install
+      
+  post_build:
+    commands:
+      - echo Build Completed Successfully
+      
+artifacts:
+  files:
+    - target/Book-Service-ECR.jar
+  discard-paths: yes
